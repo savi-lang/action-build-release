@@ -1,0 +1,366 @@
+name: build-release
+description: >
+  Build Savi application release binaries for
+  multiple platforms from a single CI runner.
+
+inputs:
+  manifest-name:
+    description: >
+      The name of the Savi manifest to build as a binary.
+    required: true
+
+  tarball-name:
+    description: >
+      The name to use for the built tarballs.
+      Each tarball will have a suffix of the platform name and `.tar.gz`.
+    required: true
+
+  x86_64-unknown-linux-gnu:
+    type: boolean
+    description: >
+      Produce a build targeting the x86_64-unknown-linux-gnu platform.
+    required: false
+    default: false
+
+  x86_64-unknown-linux-musl:
+    type: boolean
+    description: >
+      Produce a build targeting the x86_64-unknown-linux-musl platform.
+    required: false
+    default: false
+
+  arm64-unknown-linux-musl:
+    type: boolean
+    description: >
+      Produce a build targeting the arm64-unknown-linux-musl platform.
+    required: false
+    default: false
+
+  x86_64-unknown-freebsd:
+    type: boolean
+    description: >
+      Produce a build targeting the x86_64-unknown-freebsd platform.
+    required: false
+    default: false
+
+  x86_64-apple-macosx:
+    type: boolean
+    description: >
+      Produce a build targeting the x86_64-apple-macosx platform.
+    required: false
+    default: false
+
+  arm64-apple-macosx:
+    type: boolean
+    description: >
+      Produce a build targeting the arm64-apple-macosx platform.
+    required: false
+    default: false
+
+  x86_64-unknown-windows-msvc:
+    type: boolean
+    description: >
+      Produce a build targeting the x86_64-unknown-windows-msvc platform.
+    required: false
+    default: false
+
+  macosx-accept-license:
+    type: boolean
+    description: >
+      Acknowledge acceptance of the terms of the MacOSX SDK license.
+      Required for building macosx targets on non-macosx runners.
+    required: false
+    default: false
+
+  windows-accept-license:
+    type: boolean
+    description: >
+      Acknowledge acceptance of the terms of the Windows SDK license.
+      Required for building windows targets on non-windows runners.
+    required: false
+    default: false
+
+  build-command:
+    description: The build command. You probably shouldn't mess with this.
+    required: false
+    default: " \
+      echo Building $tarball_name-$target.tar.gz && \
+      rm -rf bin && \
+      savi build $manifest_name -X $target --release --no-debug && \
+      rm -rf $dir/current && \
+      cp -r bin $dir/current && \
+      mkdir -p $dir/publish && \
+      tar -czf $dir/publish/$tarball_name-$target.tar.gz -C $dir/current . \
+    "
+
+outputs:
+  tarball-directory:
+    description: The directory where the bin release tarballs were build.
+    value: ${{ steps.setup.outputs.directory }}/publish
+
+runs:
+  using: "composite"
+  steps:
+    - id: setup
+      run: echo "::set-output name=directory::$(mktemp -d)"
+      shell: bash
+    - run: mkdir -p ${{ steps.setup.outputs.directory }}/publish
+      shell: bash
+
+    # Set up the x86_64 debian root, if the user requested that target.
+    - if: ${{ inputs.x86_64-unknown-linux-gnu == 'true' }}
+      id: cache-x-x86_64-linux-gnu
+      uses: actions/cache@v3
+      with:
+        key: savi-build-release-x86_64-debian-bullseye-20220922
+        path: /tmp/x-x86_64-linux-gnu/root
+    - if: ${{ inputs.x86_64-unknown-linux-gnu == 'true' && steps.cache-x-x86_64-linux-gnu.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: |
+        libc6_sha256=a3ef5dbbfa61f944efaa759feb4b3d05f572be159216545bced7b297fc09bab5 && \
+        libc6_dev_sha256=6821bb405a262ab73c0d087d742ce531103b8906f3a5fc0ee25c347295edee30 && \
+        libgcc_dev_sha256=347113a3bdd7379846e618efb610f49ce2704032972e1797e8e126925d5d7b19 && \
+        libgcc_shared_sha256=9e1d76c3f638472f7940bfac8f42c10aa534c0a0fce2314641d41a2b492347cd && \
+        rm -rf /tmp/x-x86_64-linux-gnu && mkdir -p /tmp/x-x86_64-linux-gnu/root && \
+        wget http://http.us.debian.org/debian/pool/main/c/cross-toolchain-base/libc6-amd64-cross_2.31-9cross4_all.deb \
+          -O /tmp/x-x86_64-linux-gnu/libc6.deb && \
+        wget http://http.us.debian.org/debian/pool/main/c/cross-toolchain-base/libc6-dev-amd64-cross_2.31-9cross4_all.deb \
+          -O /tmp/x-x86_64-linux-gnu/libc6-dev.deb && \
+        wget http://http.us.debian.org/debian/pool/main/g/gcc-10-cross/libgcc-10-dev-amd64-cross_10.2.1-6cross1_all.deb \
+          -O /tmp/x-x86_64-linux-gnu/libgcc-dev.deb && \
+        wget http://http.us.debian.org/debian/pool/main/g/gcc-10-cross/libgcc-s1-amd64-cross_10.2.1-6cross1_all.deb \
+          -O /tmp/x-x86_64-linux-gnu/libgcc-shared.deb && \
+        echo $libc6_sha256'  /tmp/x-x86_64-linux-gnu/libc6.deb' | sha256sum -c - && \
+        echo $libc6_dev_sha256'  /tmp/x-x86_64-linux-gnu/libc6-dev.deb' | sha256sum -c - && \
+        echo $libgcc_dev_sha256'  /tmp/x-x86_64-linux-gnu/libgcc-dev.deb' | sha256sum -c - && \
+        echo $libgcc_shared_sha256'  /tmp/x-x86_64-linux-gnu/libgcc-shared.deb' | sha256sum -c - && \
+        cd /tmp/x-x86_64-linux-gnu && \
+        ar -xf libc6.deb data.tar.xz && tar -xf data.tar.xz -C root && \
+        ar -xf libc6-dev.deb data.tar.xz && tar -xf data.tar.xz -C root && \
+        ar -xf libgcc-dev.deb data.tar.xz && tar -xf data.tar.xz -C root && \
+        ar -xf libgcc-shared.deb data.tar.xz && tar -xf data.tar.xz -C root && \
+        echo Fixing troublesome absolute paths in linker scripts... && \
+        sed -i 's|/usr|/tmp/x-x86_64-linux-gnu/root/usr|g' \
+          root/usr/x86_64-linux-gnu/lib/libc.so \
+          root/usr/x86_64-linux-gnu/lib/libm.so \
+          && \
+        echo Done!
+
+    # Set up the x86_64 alpine root, if the user requested that target.
+    - if: ${{ inputs.x86_64-unknown-linux-musl == 'true' }}
+      id: cache-x-x86_64-alpine
+      uses: actions/cache@v3
+      with:
+        key: savi-build-release-x86_64-alpine-3.16-20220922
+        path: /tmp/x-x86_64-alpine/root
+    - if: ${{ inputs.x86_64-unknown-linux-musl == 'true' && steps.cache-x-x86_64-alpine.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: |
+        musl_dev_sha256=0c3c153ac60b9cbfb752a6e1f61b9dd5c168dfedd8837878bc4b51028f13f270 && \
+        gcc_sha256=695556c500f54e8f050609323a0022dd4635d2f3e754e97da71412e38e75b49e && \
+        libgcc_sha256=d04af44696d43e1d3c5353c4123bfb924f3dfeb40293de612b7d202bd5183eea && \
+        libexecinfo_static_sha256=6f7e89598970297f70076d3a9a946ca68cca51133c4a5aa7ae5f066a0de23639 && \
+        rm -rf /tmp/x-x86_64-alpine && mkdir -p /tmp/x-x86_64-alpine/root && \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/musl-dev-1.2.3-r0.apk \
+          -O /tmp/x-x86_64-alpine/musl-dev.apk && \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/gcc-11.2.1_git20220219-r2.apk \
+          -O /tmp/x-x86_64-alpine/gcc.apk && \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/libgcc-11.2.1_git20220219-r2.apk \
+          -O /tmp/x-x86_64-alpine/libgcc.apk && \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/libexecinfo-static-1.1-r1.apk \
+          -O /tmp/x-x86_64-alpine/libexecinfo-static.apk && \
+        echo $musl_dev_sha256'  /tmp/x-x86_64-alpine/musl-dev.apk' | sha256sum -c - && \
+        echo $gcc_sha256'  /tmp/x-x86_64-alpine/gcc.apk' | sha256sum -c - && \
+        echo $libgcc_sha256'  /tmp/x-x86_64-alpine/libgcc.apk' | sha256sum -c - && \
+        echo $libexecinfo_static_sha256'  /tmp/x-x86_64-alpine/libexecinfo-static.apk' | sha256sum -c - && \
+        cd /tmp/x-x86_64-alpine && \
+        tar -xf musl-dev.apk -C root && \
+        tar -xf gcc.apk -C root && \
+        tar -xf libgcc.apk -C root && \
+        tar -xf libexecinfo-static.apk -C root && \
+        echo Done!
+
+    # Set up the arm64 alpine root, if the user requested that target.
+    - if: ${{ inputs.arm64-unknown-linux-musl == 'true' }}
+      id: cache-x-arm64-alpine
+      uses: actions/cache@v3
+      with:
+        key: savi-build-release-arm64-alpine-3.16-20220922
+        path: /tmp/x-arm64-alpine/root
+    - if: ${{ inputs.arm64-unknown-linux-musl == 'true' && steps.cache-x-arm64-alpine.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: |
+        musl_dev_sha256=c6ce351e2943ca9d984929ca4f57efd858ba9e07f34efda3a9d738a511ae3012 && \
+        gcc_sha256=21e9acf2e0ba1b53ef82d4bc950f7b80b1aee821903d5f92de0b32e9a599cb47 && \
+        libgcc_sha256=73079ed7f6ad0fdbddd694001e4574a5e96377e28390ada53acc5309b5005ab2 && \
+        libexecinfo_static_sha256=e96e98551f6a2389122b78635789f77be912fcac20e35d26e7176f9e1d14a50f && \
+        rm -rf /tmp/x-arm64-alpine && mkdir -p /tmp/x-arm64-alpine/root && \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/musl-dev-1.2.3-r0.apk \
+          -O /tmp/x-arm64-alpine/musl-dev.apk && \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/gcc-11.2.1_git20220219-r2.apk \
+          -O /tmp/x-arm64-alpine/gcc.apk && \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/libgcc-11.2.1_git20220219-r2.apk \
+          -O /tmp/x-arm64-alpine/libgcc.apk && \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/libexecinfo-static-1.1-r1.apk \
+          -O /tmp/x-arm64-alpine/libexecinfo-static.apk && \
+        echo $musl_dev_sha256'  /tmp/x-arm64-alpine/musl-dev.apk' | sha256sum -c - && \
+        echo $gcc_sha256'  /tmp/x-arm64-alpine/gcc.apk' | sha256sum -c - && \
+        echo $libgcc_sha256'  /tmp/x-arm64-alpine/libgcc.apk' | sha256sum -c - && \
+        echo $libexecinfo_static_sha256'  /tmp/x-arm64-alpine/libexecinfo-static.apk' | sha256sum -c - && \
+        cd /tmp/x-arm64-alpine && \
+        tar -xf musl-dev.apk -C root && \
+        tar -xf gcc.apk -C root && \
+        tar -xf libgcc.apk -C root && \
+        tar -xf libexecinfo-static.apk -C root && \
+        echo Done!
+
+    # Set up the x86_64 freebsd root, if the user requested that target.
+    #
+    # For updates, see package names and hashes in the following YAML file:
+    # http://pkg.freebsd.org/FreeBSD:13:amd64/latest/packagesite.txz
+    - if: ${{ inputs.x86_64-unknown-freebsd == 'true' }}
+      id: cache-x-x86_64-freebsd
+      uses: actions/cache@v3
+      with:
+        key: savi-build-release-x86_64-freebsd-13-20220922
+        path: /tmp/x-x86_64-freebsd/root
+    - if: ${{ inputs.x86_64-unknown-freebsd == 'true' && steps.cache-x-x86_64-freebsd.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: |
+        sysroot_sha256=966a648cd0e12e6cc4e03b3c61d5975e519b0be19c8e4147a5bac2ffbd8332b4 && \
+        rm -rf /tmp/x-x86_64-freebsd && mkdir -p /tmp/x-x86_64-freebsd/root && \
+        cd /tmp/x-x86_64-freebsd && \
+        wget http://pkg.freebsd.org/FreeBSD:13:amd64/latest/All/amd64-freebsd-sysroot-a2021.11.09.pkg \
+          -O sysroot.pkg && \
+        echo $sysroot_sha256'  sysroot.pkg' | sha256sum -c - && \
+        tar -xf sysroot.pkg -C root && \
+        echo Fixing troublesome absolute paths in linker scripts... && \
+        sed -i 's| /lib| /tmp/x-x86_64-freebsd/root/usr/local/freebsd-sysroot/amd64/lib|g' \
+          root/usr/local/freebsd-sysroot/amd64/usr/lib/libc.so \
+          && \
+        sed -i 's| /usr| /tmp/x-x86_64-freebsd/root/usr/local/freebsd-sysroot/amd64/usr|g' \
+          root/usr/local/freebsd-sysroot/amd64/usr/lib/libc.so \
+          && \
+        echo Done!
+
+    # Set up the MacOSX root, if the user accepted the license.
+    - if: ${{ inputs.macosx-accept-license == 'true' }}
+      id: cache-x-macosx
+      uses: actions/cache@v3
+      with:
+        key: savi-build-release-macosx-11.3-usr-lib-20220922
+        path: /tmp/x-macosx/root/usr/lib
+    - if: ${{ inputs.macosx-accept-license == 'true' && steps.cache-x-macosx.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: |
+        macosx_sha512=36c1964ea43a782dfe2a0ef1da8c9c95ffe834fbc10b0d312ff8a87dd9f4c3310dea67e6e3d943824a2e3c288be4d60cf5bd852027770b35bc088527b598734f && \
+        rm -rf /tmp/x-macosx && mkdir -p /tmp/x-macosx/root && \
+        wget https://storage.googleapis.com/ory.sh/build-assets/MacOSX11.3.sdk.tar.xz \
+          -O /tmp/x-macosx/root.tar.gz && \
+        echo $macosx_sha512'  /tmp/x-macosx/root.tar.gz' \
+          | sha512sum -c - && \
+        tar -xf /tmp/x-macosx/root.tar.gz -C /tmp/x-macosx/root --strip-components=1 && \
+        echo Done!
+
+    # Set up the Windows root, if the user accepted the license.
+    - if: ${{ inputs.windows-accept-license == 'true' }}
+      id: cache-x-windows
+      uses: actions/cache@v3
+      with:
+        key: savi-build-release-xwin-0.2.1-20220922
+        path: /tmp/x-windows/root
+    - if: ${{ inputs.windows-accept-license == 'true' && steps.cache-x-windows.outputs.cache-hit != 'true' }}
+      shell: bash
+      env: { XWIN_ACCEPT_LICENSE: '1' }
+      run: |
+        xwin_sha256=1a242d10aec08b9ea0aa4104b106289916291ef87e3bac3b911b006faf46c288 && \
+        rm -rf /tmp/x-windows && mkdir -p /tmp/x-windows/root && \
+        cd /tmp/x-windows && \
+        curl -L --fail https://github.com/Jake-Shadle/xwin/releases/download/0.2.1/xwin-0.2.1-x86_64-unknown-linux-musl.tar.gz \
+          | tar --strip-components=1 --wildcards -xvzf - '*/xwin' && \
+        echo $xwin_sha256'  xwin' | sha256sum -c - && \
+        ./xwin splat --output /tmp/x-windows/root && \
+        echo Done!
+
+    # Install dependencies for the Savi application being built, but guarantee
+    # that the dependency manifests aren't updated compared to the source code.
+    - run: |
+        savi deps update --for ${{ inputs.manifest-name }}
+        git diff --exit-code
+      shell: bash
+
+    ##
+    # Now, build for all requested platforms...
+
+    - if: ${{ inputs.x86_64-unknown-linux-gnu == 'true' }}
+      run: ${{ inputs.build-command }}
+      shell: bash
+      env:
+        dir: ${{ steps.setup.outputs.directory }}
+        manifest_name: ${{ inputs.manifest-name }}
+        tarball_name: ${{ inputs.tarball-name }}
+        target: x86_64-unknown-linux-gnu
+        SAVI_SYS_ROOT: /tmp/x-x86_64-linux-gnu/root
+
+    - if: ${{ inputs.x86_64-unknown-linux-musl == 'true' }}
+      run: ${{ inputs.build-command }}
+      shell: bash
+      env:
+        dir: ${{ steps.setup.outputs.directory }}
+        manifest_name: ${{ inputs.manifest-name }}
+        tarball_name: ${{ inputs.tarball-name }}
+        target: x86_64-unknown-linux-musl
+        SAVI_SYS_ROOT: /tmp/x-x86_64-alpine/root
+
+    - if: ${{ inputs.arm64-unknown-linux-musl == 'true' }}
+      run: ${{ inputs.build-command }}
+      shell: bash
+      env:
+        dir: ${{ steps.setup.outputs.directory }}
+        manifest_name: ${{ inputs.manifest-name }}
+        tarball_name: ${{ inputs.tarball-name }}
+        target: arm64-unknown-linux-musl
+        SAVI_SYS_ROOT: /tmp/x-arm64-alpine/root
+
+    - if: ${{ inputs.x86_64-unknown-freebsd == 'true' }}
+      run: ${{ inputs.build-command }}
+      shell: bash
+      env:
+        dir: ${{ steps.setup.outputs.directory }}
+        manifest_name: ${{ inputs.manifest-name }}
+        tarball_name: ${{ inputs.tarball-name }}
+        target: x86_64-unknown-freebsd
+        SAVI_SYS_ROOT: /tmp/x-x86_64-freebsd/root/usr/local/freebsd-sysroot/amd64
+
+    - if: ${{ inputs.x86_64-apple-macosx == 'true' }}
+      run: ${{ inputs.build-command }}
+      shell: bash
+      env:
+        dir: ${{ steps.setup.outputs.directory }}
+        manifest_name: ${{ inputs.manifest-name }}
+        tarball_name: ${{ inputs.tarball-name }}
+        target: x86_64-apple-macosx
+        SAVI_SYS_ROOT: /tmp/x-macosx/root
+
+    - if: ${{ inputs.arm64-apple-macosx == 'true' }}
+      run: ${{ inputs.build-command }}
+      shell: bash
+      env:
+        dir: ${{ steps.setup.outputs.directory }}
+        manifest_name: ${{ inputs.manifest-name }}
+        tarball_name: ${{ inputs.tarball-name }}
+        target: arm64-apple-macosx
+        SAVI_SYS_ROOT: /tmp/x-macosx/root
+
+    - if: ${{ inputs.x86_64-unknown-windows-msvc == 'true' }}
+      run: ${{ inputs.build-command }}
+      shell: bash
+      env:
+        dir: ${{ steps.setup.outputs.directory }}
+        manifest_name: ${{ inputs.manifest-name }}
+        tarball_name: ${{ inputs.tarball-name }}
+        target: x86_64-unknown-windows-msvc
+        SAVI_SYS_ROOT: /tmp/x-windows/root
+
+    - run: ls -la ${{ steps.setup.outputs.directory }}/publish
+      shell: bash
