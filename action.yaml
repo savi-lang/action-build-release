@@ -15,6 +15,13 @@ inputs:
       Each tarball will have a suffix of the platform name and `.tar.gz`.
     required: true
 
+  all-platforms:
+    type: boolean
+    description: >
+      Produce builds for all platforms.
+    required: false
+    default: false
+
   x86_64-unknown-linux-gnu:
     type: boolean
     description: >
@@ -108,13 +115,18 @@ runs:
       shell: bash
 
     # Set up the x86_64 debian root, if the user requested that target.
-    - if: ${{ inputs.x86_64-unknown-linux-gnu == 'true' }}
+    - if: >
+        inputs.x86_64-unknown-linux-gnu == 'true'
+        || inputs.all-platforms == 'true'
       id: cache-x-x86_64-linux-gnu
       uses: actions/cache@v3
       with:
         key: savi-build-release-x86_64-debian-bullseye-20220922
         path: /tmp/x-x86_64-linux-gnu/root
-    - if: ${{ inputs.x86_64-unknown-linux-gnu == 'true' && steps.cache-x-x86_64-linux-gnu.outputs.cache-hit != 'true' }}
+    - if: >
+        (inputs.x86_64-unknown-linux-gnu == 'true'
+          || inputs.all-platforms == 'true')
+        && steps.cache-x-x86_64-linux-gnu.outputs.cache-hit != 'true'
       shell: bash
       run: |
         libc6_sha256=a3ef5dbbfa61f944efaa759feb4b3d05f572be159216545bced7b297fc09bab5 && \
@@ -147,13 +159,18 @@ runs:
         echo Done!
 
     # Set up the x86_64 alpine root, if the user requested that target.
-    - if: ${{ inputs.x86_64-unknown-linux-musl == 'true' }}
+    - if: >
+        inputs.x86_64-unknown-linux-musl == 'true'
+        || inputs.all-platforms == 'true'
       id: cache-x-x86_64-alpine
       uses: actions/cache@v3
       with:
         key: savi-build-release-x86_64-alpine-3.16-20220922
         path: /tmp/x-x86_64-alpine/root
-    - if: ${{ inputs.x86_64-unknown-linux-musl == 'true' && steps.cache-x-x86_64-alpine.outputs.cache-hit != 'true' }}
+    - if: >
+        (inputs.x86_64-unknown-linux-musl == 'true'
+          || inputs.all-platforms == 'true')
+        && steps.cache-x-x86_64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
         musl_dev_sha256=0c3c153ac60b9cbfb752a6e1f61b9dd5c168dfedd8837878bc4b51028f13f270 && \
@@ -181,13 +198,18 @@ runs:
         echo Done!
 
     # Set up the arm64 alpine root, if the user requested that target.
-    - if: ${{ inputs.arm64-unknown-linux-musl == 'true' }}
+    - if: >
+        inputs.arm64-unknown-linux-musl == 'true'
+        || inputs.all-platforms == 'true'
       id: cache-x-arm64-alpine
       uses: actions/cache@v3
       with:
         key: savi-build-release-arm64-alpine-3.16-20220922
         path: /tmp/x-arm64-alpine/root
-    - if: ${{ inputs.arm64-unknown-linux-musl == 'true' && steps.cache-x-arm64-alpine.outputs.cache-hit != 'true' }}
+    - if: >
+        (inputs.arm64-unknown-linux-musl == 'true'
+          || inputs.all-platforms == 'true')
+        && steps.cache-x-arm64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
         musl_dev_sha256=c6ce351e2943ca9d984929ca4f57efd858ba9e07f34efda3a9d738a511ae3012 && \
@@ -218,13 +240,18 @@ runs:
     #
     # For updates, see package names and hashes in the following YAML file:
     # http://pkg.freebsd.org/FreeBSD:13:amd64/latest/packagesite.txz
-    - if: ${{ inputs.x86_64-unknown-freebsd == 'true' }}
+    - if: >
+        inputs.x86_64-unknown-freebsd == 'true'
+        || inputs.all-platforms == 'true'
       id: cache-x-x86_64-freebsd
       uses: actions/cache@v3
       with:
         key: savi-build-release-x86_64-freebsd-13-20220922
         path: /tmp/x-x86_64-freebsd/root
-    - if: ${{ inputs.x86_64-unknown-freebsd == 'true' && steps.cache-x-x86_64-freebsd.outputs.cache-hit != 'true' }}
+    - if: >
+        (inputs.x86_64-unknown-freebsd == 'true'
+          || inputs.all-platforms == 'true')
+        && steps.cache-x-x86_64-freebsd.outputs.cache-hit != 'true'
       shell: bash
       run: |
         sysroot_sha256=966a648cd0e12e6cc4e03b3c61d5975e519b0be19c8e4147a5bac2ffbd8332b4 && \
@@ -244,13 +271,15 @@ runs:
         echo Done!
 
     # Set up the MacOSX root, if the user accepted the license.
-    - if: ${{ inputs.macosx-accept-license == 'true' }}
+    - if: inputs.macosx-accept-license == 'true'
       id: cache-x-macosx
       uses: actions/cache@v3
       with:
         key: savi-build-release-macosx-11.3-usr-lib-20220922
         path: /tmp/x-macosx/root/usr/lib
-    - if: ${{ inputs.macosx-accept-license == 'true' && steps.cache-x-macosx.outputs.cache-hit != 'true' }}
+    - if: >
+        inputs.macosx-accept-license == 'true'
+        && steps.cache-x-macosx.outputs.cache-hit != 'true'
       shell: bash
       run: |
         macosx_sha512=36c1964ea43a782dfe2a0ef1da8c9c95ffe834fbc10b0d312ff8a87dd9f4c3310dea67e6e3d943824a2e3c288be4d60cf5bd852027770b35bc088527b598734f && \
@@ -263,13 +292,15 @@ runs:
         echo Done!
 
     # Set up the Windows root, if the user accepted the license.
-    - if: ${{ inputs.windows-accept-license == 'true' }}
+    - if: inputs.windows-accept-license == 'true'
       id: cache-x-windows
       uses: actions/cache@v3
       with:
         key: savi-build-release-xwin-0.2.1-20220922
         path: /tmp/x-windows/root
-    - if: ${{ inputs.windows-accept-license == 'true' && steps.cache-x-windows.outputs.cache-hit != 'true' }}
+    - if: >
+        inputs.windows-accept-license == 'true'
+        && steps.cache-x-windows.outputs.cache-hit != 'true'
       shell: bash
       env: { XWIN_ACCEPT_LICENSE: '1' }
       run: |
@@ -292,7 +323,9 @@ runs:
     ##
     # Now, build for all requested platforms...
 
-    - if: ${{ inputs.x86_64-unknown-linux-gnu == 'true' }}
+    - if: >
+        inputs.x86_64-unknown-linux-gnu == 'true'
+        || inputs.all-platforms == 'true'
       run: ${{ inputs.build-command }}
       shell: bash
       env:
@@ -302,7 +335,9 @@ runs:
         target: x86_64-unknown-linux-gnu
         SAVI_SYS_ROOT: /tmp/x-x86_64-linux-gnu/root
 
-    - if: ${{ inputs.x86_64-unknown-linux-musl == 'true' }}
+    - if: >
+        inputs.x86_64-unknown-linux-musl == 'true'
+        || inputs.all-platforms == 'true'
       run: ${{ inputs.build-command }}
       shell: bash
       env:
@@ -312,7 +347,9 @@ runs:
         target: x86_64-unknown-linux-musl
         SAVI_SYS_ROOT: /tmp/x-x86_64-alpine/root
 
-    - if: ${{ inputs.arm64-unknown-linux-musl == 'true' }}
+    - if: >
+        inputs.arm64-unknown-linux-musl == 'true'
+        || inputs.all-platforms == 'true'
       run: ${{ inputs.build-command }}
       shell: bash
       env:
@@ -322,7 +359,9 @@ runs:
         target: arm64-unknown-linux-musl
         SAVI_SYS_ROOT: /tmp/x-arm64-alpine/root
 
-    - if: ${{ inputs.x86_64-unknown-freebsd == 'true' }}
+    - if: >
+        inputs.x86_64-unknown-freebsd == 'true'
+        || inputs.all-platforms == 'true'
       run: ${{ inputs.build-command }}
       shell: bash
       env:
@@ -332,7 +371,9 @@ runs:
         target: x86_64-unknown-freebsd
         SAVI_SYS_ROOT: /tmp/x-x86_64-freebsd/root/usr/local/freebsd-sysroot/amd64
 
-    - if: ${{ inputs.x86_64-apple-macosx == 'true' }}
+    - if: >
+        inputs.x86_64-apple-macosx == 'true'
+        || inputs.all-platforms == 'true'
       run: ${{ inputs.build-command }}
       shell: bash
       env:
@@ -342,7 +383,9 @@ runs:
         target: x86_64-apple-macosx
         SAVI_SYS_ROOT: /tmp/x-macosx/root
 
-    - if: ${{ inputs.arm64-apple-macosx == 'true' }}
+    - if: >
+        inputs.arm64-apple-macosx == 'true'
+        || inputs.all-platforms == 'true'
       run: ${{ inputs.build-command }}
       shell: bash
       env:
@@ -352,7 +395,9 @@ runs:
         target: arm64-apple-macosx
         SAVI_SYS_ROOT: /tmp/x-macosx/root
 
-    - if: ${{ inputs.x86_64-unknown-windows-msvc == 'true' }}
+    - if: >
+        inputs.x86_64-unknown-windows-msvc == 'true'
+        || inputs.all-platforms == 'true'
       run: ${{ inputs.build-command }}
       shell: bash
       env:
