@@ -35,13 +35,7 @@ jobs:
         with:
           manifest-name: example
           tarball-name: example-vX.Y.Z
-          x86_64-unknown-linux-gnu: true
-          x86_64-unknown-linux-musl: true
-          arm64-unknown-linux-musl: true
-          x86_64-unknown-freebsd: true
-          x86_64-apple-macosx: true
-          arm64-apple-macosx: true
-          x86_64-unknown-windows-msvc: true
+          all-platforms: true
           macosx-accept-license: true
           windows-accept-license: true
 
