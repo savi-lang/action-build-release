@@ -254,10 +254,10 @@ runs:
         && steps.cache-x-x86_64-freebsd.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        sysroot_sha256=966a648cd0e12e6cc4e03b3c61d5975e519b0be19c8e4147a5bac2ffbd8332b4 && \
+        sysroot_sha256=e5ed6d9d27bc105b2c4a6cd2d49759cd0b15b6ff39e1adc7ea3a36eb91cca0af && \
         rm -rf /tmp/x-x86_64-freebsd && mkdir -p /tmp/x-x86_64-freebsd/root && \
         cd /tmp/x-x86_64-freebsd && \
-        wget http://pkg.freebsd.org/FreeBSD:13:amd64/latest/All/amd64-freebsd-sysroot-a2021.11.09.pkg \
+        wget http://pkg.freebsd.org/FreeBSD:13:amd64/latest/All/amd64-freebsd-sysroot-a2022.12.14.pkg \
           -O sysroot.pkg && \
         echo $sysroot_sha256'  sysroot.pkg' | sha256sum -c - && \
         tar -xf sysroot.pkg -C root && \
