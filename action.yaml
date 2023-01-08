@@ -173,12 +173,12 @@ runs:
         && steps.cache-x-x86_64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        musl_dev_sha256=0c3c153ac60b9cbfb752a6e1f61b9dd5c168dfedd8837878bc4b51028f13f270 && \
+        musl_dev_sha256=da70b3a9c8d6f2b8c9f7be9ea0267b42904abf27e5ce10d810c032708b0b8b99 && \
         gcc_sha256=695556c500f54e8f050609323a0022dd4635d2f3e754e97da71412e38e75b49e && \
         libgcc_sha256=d04af44696d43e1d3c5353c4123bfb924f3dfeb40293de612b7d202bd5183eea && \
         libexecinfo_static_sha256=6f7e89598970297f70076d3a9a946ca68cca51133c4a5aa7ae5f066a0de23639 && \
         rm -rf /tmp/x-x86_64-alpine && mkdir -p /tmp/x-x86_64-alpine/root && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/musl-dev-1.2.3-r0.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/musl-dev-1.2.3-r2.apk \
           -O /tmp/x-x86_64-alpine/musl-dev.apk && \
         wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/gcc-11.2.1_git20220219-r2.apk \
           -O /tmp/x-x86_64-alpine/gcc.apk && \
@@ -212,12 +212,12 @@ runs:
         && steps.cache-x-arm64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        musl_dev_sha256=c6ce351e2943ca9d984929ca4f57efd858ba9e07f34efda3a9d738a511ae3012 && \
+        musl_dev_sha256=a09a2f0ee87d152b988a892ee1016ae37c1e6c22287441de85ddbcbe292061e6 && \
         gcc_sha256=21e9acf2e0ba1b53ef82d4bc950f7b80b1aee821903d5f92de0b32e9a599cb47 && \
         libgcc_sha256=73079ed7f6ad0fdbddd694001e4574a5e96377e28390ada53acc5309b5005ab2 && \
         libexecinfo_static_sha256=e96e98551f6a2389122b78635789f77be912fcac20e35d26e7176f9e1d14a50f && \
         rm -rf /tmp/x-arm64-alpine && mkdir -p /tmp/x-arm64-alpine/root && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/musl-dev-1.2.3-r0.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/musl-dev-1.2.3-r2.apk \
           -O /tmp/x-arm64-alpine/musl-dev.apk && \
         wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/gcc-11.2.1_git20220219-r2.apk \
           -O /tmp/x-arm64-alpine/gcc.apk && \
