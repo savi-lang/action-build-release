@@ -165,7 +165,7 @@ runs:
       id: cache-x-x86_64-alpine
       uses: actions/cache@v3
       with:
-        key: savi-build-release-x86_64-alpine-3.16-20220922
+        key: savi-build-release-x86_64-alpine-3.17-20220922
         path: /tmp/x-x86_64-alpine/root
     - if: >
         (inputs.x86_64-unknown-linux-musl == 'true'
@@ -173,28 +173,23 @@ runs:
         && steps.cache-x-x86_64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        musl_dev_sha256=da70b3a9c8d6f2b8c9f7be9ea0267b42904abf27e5ce10d810c032708b0b8b99 && \
-        gcc_sha256=695556c500f54e8f050609323a0022dd4635d2f3e754e97da71412e38e75b49e && \
-        libgcc_sha256=d04af44696d43e1d3c5353c4123bfb924f3dfeb40293de612b7d202bd5183eea && \
-        libexecinfo_static_sha256=6f7e89598970297f70076d3a9a946ca68cca51133c4a5aa7ae5f066a0de23639 && \
+        musl_dev_sha256=5df2320d68bf964a1f047649644264fca8a6c2fa9d417ea75c729457fad9df6f && \
+        gcc_sha256=ebf07b623a8bb3ebe18e8e1431118f6cc3f381d52aa57fc94c825c43d151f8f7 && \
+        libgcc_sha256=2c0282ec5c2d78fe94b1e0ab676d6fe675e6656796b8a92e29ce4b17234add6a && \
         rm -rf /tmp/x-x86_64-alpine && mkdir -p /tmp/x-x86_64-alpine/root && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/musl-dev-1.2.3-r2.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/x86_64/musl-dev-1.2.3-r5.apk \
           -O /tmp/x-x86_64-alpine/musl-dev.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/gcc-11.2.1_git20220219-r2.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/x86_64/gcc-12.2.1_git20220924-r4.apk \
           -O /tmp/x-x86_64-alpine/gcc.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/libgcc-11.2.1_git20220219-r2.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/x86_64/libgcc-12.2.1_git20220924-r4.apk \
           -O /tmp/x-x86_64-alpine/libgcc.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/x86_64/libexecinfo-static-1.1-r1.apk \
-          -O /tmp/x-x86_64-alpine/libexecinfo-static.apk && \
         echo $musl_dev_sha256'  /tmp/x-x86_64-alpine/musl-dev.apk' | sha256sum -c - && \
         echo $gcc_sha256'  /tmp/x-x86_64-alpine/gcc.apk' | sha256sum -c - && \
         echo $libgcc_sha256'  /tmp/x-x86_64-alpine/libgcc.apk' | sha256sum -c - && \
-        echo $libexecinfo_static_sha256'  /tmp/x-x86_64-alpine/libexecinfo-static.apk' | sha256sum -c - && \
         cd /tmp/x-x86_64-alpine && \
         tar -xf musl-dev.apk -C root && \
         tar -xf gcc.apk -C root && \
         tar -xf libgcc.apk -C root && \
-        tar -xf libexecinfo-static.apk -C root && \
         echo Done!
 
     # Set up the arm64 alpine root, if the user requested that target.
@@ -204,7 +199,7 @@ runs:
       id: cache-x-arm64-alpine
       uses: actions/cache@v3
       with:
-        key: savi-build-release-arm64-alpine-3.16-20220922
+        key: savi-build-release-arm64-alpine-3.17-20220922
         path: /tmp/x-arm64-alpine/root
     - if: >
         (inputs.arm64-unknown-linux-musl == 'true'
@@ -212,28 +207,23 @@ runs:
         && steps.cache-x-arm64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        musl_dev_sha256=a09a2f0ee87d152b988a892ee1016ae37c1e6c22287441de85ddbcbe292061e6 && \
-        gcc_sha256=21e9acf2e0ba1b53ef82d4bc950f7b80b1aee821903d5f92de0b32e9a599cb47 && \
-        libgcc_sha256=73079ed7f6ad0fdbddd694001e4574a5e96377e28390ada53acc5309b5005ab2 && \
-        libexecinfo_static_sha256=e96e98551f6a2389122b78635789f77be912fcac20e35d26e7176f9e1d14a50f && \
+        musl_dev_sha256=6a194ea8eb7045f517c396b1f3e6865aa048196ee7d4d2fbc2e56e26ae6daac6 && \
+        gcc_sha256=7742bdd9dcd5c4d357fda1c13830af8afad15b4aae291c24c7f87a2701d37584 && \
+        libgcc_sha256=4247daeec6d4f005c2c5e420c49b12f3deadb5640f0eb58e8e1a3c8cd0a32206 && \
         rm -rf /tmp/x-arm64-alpine && mkdir -p /tmp/x-arm64-alpine/root && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/musl-dev-1.2.3-r2.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/aarch64/musl-dev-1.2.3-r5.apk \
           -O /tmp/x-arm64-alpine/musl-dev.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/gcc-11.2.1_git20220219-r2.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/aarch64/gcc-12.2.1_git20220924-r4.apk \
           -O /tmp/x-arm64-alpine/gcc.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/libgcc-11.2.1_git20220219-r2.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/aarch64/libgcc-12.2.1_git20220924-r4.apk \
           -O /tmp/x-arm64-alpine/libgcc.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.16/main/aarch64/libexecinfo-static-1.1-r1.apk \
-          -O /tmp/x-arm64-alpine/libexecinfo-static.apk && \
         echo $musl_dev_sha256'  /tmp/x-arm64-alpine/musl-dev.apk' | sha256sum -c - && \
         echo $gcc_sha256'  /tmp/x-arm64-alpine/gcc.apk' | sha256sum -c - && \
         echo $libgcc_sha256'  /tmp/x-arm64-alpine/libgcc.apk' | sha256sum -c - && \
-        echo $libexecinfo_static_sha256'  /tmp/x-arm64-alpine/libexecinfo-static.apk' | sha256sum -c - && \
         cd /tmp/x-arm64-alpine && \
         tar -xf musl-dev.apk -C root && \
         tar -xf gcc.apk -C root && \
         tar -xf libgcc.apk -C root && \
-        tar -xf libexecinfo-static.apk -C root && \
         echo Done!
 
     # Set up the x86_64 freebsd root, if the user requested that target.
