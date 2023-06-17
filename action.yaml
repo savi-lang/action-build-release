@@ -109,7 +109,7 @@ runs:
   using: "composite"
   steps:
     - id: setup
-      run: echo "::set-output name=directory::$(mktemp -d)"
+      run: echo "directory=$(mktemp -d)" >> $GITHUB_OUTPUT
       shell: bash
     - run: mkdir -p ${{ steps.setup.outputs.directory }}/publish
       shell: bash
