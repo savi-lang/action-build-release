@@ -236,7 +236,7 @@ runs:
       id: cache-x-x86_64-freebsd
       uses: actions/cache@v3
       with:
-        key: savi-build-release-x86_64-freebsd-13-20230202
+        key: savi-build-release-x86_64-freebsd-14-20230421
         path: /tmp/x-x86_64-freebsd/root
     - if: >
         (inputs.x86_64-unknown-freebsd == 'true'
@@ -244,10 +244,10 @@ runs:
         && steps.cache-x-x86_64-freebsd.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        sysroot_sha256=3f902e12cbc5680aa28447eee7f3e40eb29ab942e5df952a1db2325cefcedb1c && \
+        sysroot_sha256=def304c61f3a24ba9393cba62cb93bf8aa6404bf28a2603d4226695b1de5abcd && \
         rm -rf /tmp/x-x86_64-freebsd && mkdir -p /tmp/x-x86_64-freebsd/root && \
         cd /tmp/x-x86_64-freebsd && \
-        wget http://pkg.freebsd.org/FreeBSD:13:amd64/release_1/All/amd64-freebsd-sysroot-a2021.11.09.pkg \
+        wget http://pkg.freebsd.org/FreeBSD:14:amd64/release_0/All/amd64-freebsd-sysroot-a2023.08.03.pkg \
           -O sysroot.pkg && \
         echo $sysroot_sha256'  sysroot.pkg' | sha256sum -c - && \
         tar -xf sysroot.pkg -C root && \
