@@ -173,15 +173,15 @@ runs:
         && steps.cache-x-x86_64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        musl_dev_sha256=5df2320d68bf964a1f047649644264fca8a6c2fa9d417ea75c729457fad9df6f && \
-        gcc_sha256=ebf07b623a8bb3ebe18e8e1431118f6cc3f381d52aa57fc94c825c43d151f8f7 && \
-        libgcc_sha256=2c0282ec5c2d78fe94b1e0ab676d6fe675e6656796b8a92e29ce4b17234add6a && \
+        musl_dev_sha256=f15e6412463bfe3f60997932eec607ac6d6ad412dcd3a3b0fed4b0176e15bfea && \
+        gcc_sha256=2e205e11568eb2ef07b7d26e4a7c6941e2e0164a274896b05ce51d49e6b5445e && \
+        libgcc_sha256=38dfb3df460204509b448ae6d401edd330cca64b56d6674ae266a342161a5976 && \
         rm -rf /tmp/x-x86_64-alpine && mkdir -p /tmp/x-x86_64-alpine/root && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/x86_64/musl-dev-1.2.3-r5.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/musl-dev-1.2.5-r9.apk \
           -O /tmp/x-x86_64-alpine/musl-dev.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/x86_64/gcc-12.2.1_git20220924-r4.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/gcc-14.2.0-r4.apk \
           -O /tmp/x-x86_64-alpine/gcc.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/x86_64/libgcc-12.2.1_git20220924-r4.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/libgcc-14.2.0-r4.apk \
           -O /tmp/x-x86_64-alpine/libgcc.apk && \
         echo $musl_dev_sha256'  /tmp/x-x86_64-alpine/musl-dev.apk' | sha256sum -c - && \
         echo $gcc_sha256'  /tmp/x-x86_64-alpine/gcc.apk' | sha256sum -c - && \
@@ -207,15 +207,15 @@ runs:
         && steps.cache-x-arm64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        musl_dev_sha256=6a194ea8eb7045f517c396b1f3e6865aa048196ee7d4d2fbc2e56e26ae6daac6 && \
-        gcc_sha256=7742bdd9dcd5c4d357fda1c13830af8afad15b4aae291c24c7f87a2701d37584 && \
-        libgcc_sha256=4247daeec6d4f005c2c5e420c49b12f3deadb5640f0eb58e8e1a3c8cd0a32206 && \
+        musl_dev_sha256=205e60c2f3b99c34f3836e4999158c8dc6dbcaa18b7736e4ba708e73b5f0629e && \
+        gcc_sha256=97373dfb7d17b1939c5e7998ae468f5dfb41ecc02c37af168535911d8cef906d && \
+        libgcc_sha256=9ff0d4f464e529144386e2ba725c7923732a25f6be7664eeae338525a7e67164 && \
         rm -rf /tmp/x-arm64-alpine && mkdir -p /tmp/x-arm64-alpine/root && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/aarch64/musl-dev-1.2.3-r5.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.21/main/aarch64/musl-dev-1.2.5-r9.apk \
           -O /tmp/x-arm64-alpine/musl-dev.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/aarch64/gcc-12.2.1_git20220924-r4.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.21/main/aarch64/gcc-14.2.0-r4.apk \
           -O /tmp/x-arm64-alpine/gcc.apk && \
-        wget https://dl-cdn.alpinelinux.org/alpine/v3.17/main/aarch64/libgcc-12.2.1_git20220924-r4.apk \
+        wget https://dl-cdn.alpinelinux.org/alpine/v3.21/main/aarch64/libgcc-14.2.0-r4.apk \
           -O /tmp/x-arm64-alpine/libgcc.apk && \
         echo $musl_dev_sha256'  /tmp/x-arm64-alpine/musl-dev.apk' | sha256sum -c - && \
         echo $gcc_sha256'  /tmp/x-arm64-alpine/gcc.apk' | sha256sum -c - && \
