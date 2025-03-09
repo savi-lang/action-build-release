@@ -173,9 +173,9 @@ runs:
         && steps.cache-x-x86_64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        musl_dev_sha256=f15e6412463bfe3f60997932eec607ac6d6ad412dcd3a3b0fed4b0176e15bfea && \
-        gcc_sha256=2e205e11568eb2ef07b7d26e4a7c6941e2e0164a274896b05ce51d49e6b5445e && \
-        libgcc_sha256=38dfb3df460204509b448ae6d401edd330cca64b56d6674ae266a342161a5976 && \
+        musl_dev_sha256=4a8f5baae81869a5136db7d321fcaed2d499252c7d8da6b28fbb3e8188f38785 && \
+        gcc_sha256=6727367ddd0c58203ac4e9b96a30d371e92da64c4b0f7b1b2afbd512c80a61be && \
+        libgcc_sha256=8675867db77b5af11b88fd19186450333202d94cccd84a76a066dccd5b6e8cf1 && \
         rm -rf /tmp/x-x86_64-alpine && mkdir -p /tmp/x-x86_64-alpine/root && \
         wget https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/musl-dev-1.2.5-r9.apk \
           -O /tmp/x-x86_64-alpine/musl-dev.apk && \
@@ -207,9 +207,9 @@ runs:
         && steps.cache-x-arm64-alpine.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        musl_dev_sha256=205e60c2f3b99c34f3836e4999158c8dc6dbcaa18b7736e4ba708e73b5f0629e && \
-        gcc_sha256=97373dfb7d17b1939c5e7998ae468f5dfb41ecc02c37af168535911d8cef906d && \
-        libgcc_sha256=9ff0d4f464e529144386e2ba725c7923732a25f6be7664eeae338525a7e67164 && \
+        musl_dev_sha256=c5809358ba45016a6bd160f8ec37633b5b0e60f08a776205d22a05fb59403dee && \
+        gcc_sha256=f9fa19072d1f1a4f72631f3fd090a85a48b95fa08b2062630ea96813275e130f && \
+        libgcc_sha256=7cfdc00f102d3b98fe563b31e7a59a7b7ab61850c1751915f34e419e83ef2653 && \
         rm -rf /tmp/x-arm64-alpine && mkdir -p /tmp/x-arm64-alpine/root && \
         wget https://dl-cdn.alpinelinux.org/alpine/v3.21/main/aarch64/musl-dev-1.2.5-r9.apk \
           -O /tmp/x-arm64-alpine/musl-dev.apk && \

@@ -53,7 +53,7 @@ jobs:
           ls -la example-vX.Y.Z-x86_64-unknown-windows-msvc.tar.gz
 
       - name: Upload the tarballs as artifacts for download
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release-tarballs
           path: ${{ steps.example.outputs.tarball-directory }}
